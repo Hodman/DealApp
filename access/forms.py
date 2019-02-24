@@ -3,7 +3,6 @@ from django import forms
 from .models import UserProfile
 
 
-
 class SignUpForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
@@ -20,6 +19,12 @@ class SignUpForm(forms.ModelForm):
             raise forms.ValidationError("Passwords don't match")
         return password2
 
+    def clean_user_type(self):
+        user_type = self.cleaned_data.get("user_type")
+        if not user_type:
+            raise forms.ValidationError("You didn't choose user type!")
+        return user_type
+
     def save(self, commit=True):
         # Save the provided password in hashed format
         user = super().save(commit=False)
@@ -35,7 +40,16 @@ class LogInForm(forms.ModelForm):
         model = UserProfile
         fields = ['username']
 
-    def clean_password(self):
-        password = self.cleaned_data.get('password')
-        return password
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        password = self.cleaned_data.get("password")
+        if not username:
+            raise forms.ValidationError("Please insert your user name")
+        try:
+            user = UserProfile.objects.get(username=username)
+            if user.password != password:
+                raise forms.ValidationError("Invalid user credential")
+        except UserProfile.DoesNotExist:
+            raise forms.ValidationError("User does not exist")
+        return username
 

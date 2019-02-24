@@ -4,7 +4,6 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate, login, logout
 
-
 from . import forms
 from .models import UserProfile, user_photo_directory_path
 
@@ -58,11 +57,11 @@ class LogInView(View):
     template_name = 'account/login.html'
 
     def get(self, request, *args, **kwargs):
-        template = self.template_name
         form = forms.LogInForm()
-        return render(request, template, locals())
+        return render(request, self.template_name, locals())
 
     def post(self, request, *args, **kwargs):
+        form = forms.LogInForm(request.POST)
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
         user = authenticate(request, username=username, password=password)
@@ -77,12 +76,9 @@ class LogInView(View):
             else:
                 return redirect('base:home')
         else:
-            login_error = "User dose not exist"
-            form = forms.LogInForm(None)
             return render(request, self.template_name, locals())
 
 
 def userlogout(request):
     logout(request)
     return redirect('base:home')
-
