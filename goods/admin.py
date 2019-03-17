@@ -13,3 +13,12 @@ class GoodsAdmin(admin.ModelAdmin):
 
 admin.site.register(Goods, GoodsAdmin)
 
+
+class GoodsFeedbackAdmin(admin.ModelAdmin):
+    list_display = ['id', 'writer', 'comment', 'is_active']
+    list_filter = ['product']
+    list_per_page = 900
+
+
+admin.site.register(GoodsFeedback, GoodsFeedbackAdmin)
+
