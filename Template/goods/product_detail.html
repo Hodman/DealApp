@@ -31,84 +31,79 @@
             </div>
         </div>
     </div>
-    <div class="ui comments">
-        <button class="ui primary basic button tiny feedback-button">
-            <i class="icon edit"></i>Leave a comment
-        </button>
-        <div class="goodsfeedback ui form">
 
-            <form class="form" method="post" action {% url 'all_goods:product_view' product_id %} >
-                {% csrf_token %}
-                <div id="goodsfeedback" style="width: 80%; float: right;">
-                    {{ form }}
-                    <input type='hidden' id="replay-comment-id" value="" name="replay-comment-id">
-                </div>
-                <button class="ui primary basic button tiny" style="margin-left: 10px; margin-top: 32px  ">
-                    <i class="icon edit"></i>Send
-                </button>
-            </form>
-        </div>
+    <button class="ui primary basic button tiny feedback-button comment-button">
+        <i class="icon edit"></i>Leave a comment
+    </button>
+    <div class="goodsfeedback ui form">
+        <form class="form" method="post" action {% url 'all_goods:product_view' product_id %} >
+            {% csrf_token %}
+            <div id="goodsfeedback" style="width: 80%; float: right;">
+                {{ form }}
+                <input type='hidden' id="replay-comment-id" value="" name="replay-comment-id">
+            </div>
+            <button class="ui primary basic button tiny" style="margin-left: 10px; margin-top: 32px  ">
+                <i class="icon edit"></i>Send
+            </button>
+        </form>
+    </div>
+    <div class="ui threaded comments">
         <h3 class="ui dividing header">Comments</h3>
-        <div class="feedbacks">
-            {% for comment in feedbacks %}
+
+        {% for comment in feedbacks %}
+            {% with next_element=feedbacks|next:forloop.counter0 %}
                 {% if comment.comment == None %}
-                    <div class="feedback comment ">
+                    <div class="comment">
                         <a class="avatar">
                             <img src="{{ comment.writer.photo.url }}">
                         </a>
-                        <div class="content">
+                        <div class="content" id="comment-{{ comment.id }}">
                             <a class="author">{{ comment.writer.username }}</a>
                             <div class="metadata">
                                 <span class="date">{{ comment.created }}</span>
                             </div>
-                            <div class="text feedback-text">
+                            <div class="text">
                                 <p>{{ comment.text }}</p>
                             </div>
-                            <div class="feedback-likes">
-                                <a class="like">
-                                    <i class="like icon"></i> 4 Likes
-                                </a>
+                            <div class="actions feedback-button" id="{{ comment.id }}">
+                                <a class="reply">Replay</a>
                             </div>
-                        <div class="actions replay-button feedback-button" id="{{ comment.id }}">
-                                <a class="reply link-replay"><i class="reply icon">Replay</i></a>
-                            </div>
-                    </div>
-
                         </div>
+                        {% if next_element.comment != None %}
+                            <div class="comments">
+                                {% else %}
+                            </div>
+                        {% endif %}
+                        {% else %}
+                        <div class="comment" id="comment-{{ comment.id }}">
+                            <a class="avatar">
+                                {{ comment.counter }}
+                                <img src="{{ comment.writer.photo.url }}">
+                            </a>
+                            <div class="content">
+                                <a class="author">{{ comment.writer.username }}</a>
+                                <div class="metadata">
 
-                {% else %}
-                    <div class="replay">
-                        <div class="comments">
-                            <div class="comment">
-                                <a class="avatar">
-                                    <img src="{{ comment.writer.photo.url }}">
-                                </a>
-                                <div class="content">
-                                    <a class="author">{{ comment.writer.username }}</a>
-                                    <div class="metadata">
-                                        <span class="date">{{ comment.created }}</span>
-                                        <span class="replay-info">{{ comment.comment.writer }} </span>
-                                    </div>
-                                    <div class="text">
-                                        {{ comment.text }}
-                                    </div>
-                                    <div class="feedback-likes">
-                                        <a class="like">
-                                            <i class="like icon"></i> 4 Likes
-                                        </a>
-                                    </div>
-                                    <div class="actions replay-button feedback-button" id="{{ comment.comment_id }}">
-                                        <a class="reply"><i class="reply icon">Replay</i></a>
-                                    </div>
+                                    <i class="long arrow alternate right icon"></i><a class="replay-reference"
+                                                                                      id="link-{{ comment.comment_id }}">{{ comment.comment.writer }}</a>
+                                </div>
+                                <div class="text">
+                                    {{ comment.text }}
+                                </div>
+                                <div class="actions metadata feedback-button"
+                                     id="{{ comment.id }}">
+                                    <a class="reply">Replay</a>
+                                    <span class="date">{{ comment.created }}</span>
+
                                 </div>
                             </div>
                         </div>
-                    </div>
-                {% endif %}
-            {% endfor %}
-            <i class="ui divider">
-            </i>
-        </div>
+                        {% if next_element.comment == None or next_element == feedback.forloop.last %}
+                            </div>
+                            </div>
 
-    </div>
+                        {% endif %}
+                {% endif %}
+            {% endwith %}
+        {% endfor %}
 {% endblock %}

@@ -25,31 +25,22 @@ class ProductDetailView(View):
         feedbacks = []
         try:
             product = Goods.objects.get(id=product_id)
-            feedback = GoodsFeedback.objects.filter(product=product, comment=None)
-            for feed in feedback:
-                self.feedbacks.append(feed)
-                self.feedloop(feed)
-                feedbacks += self.feedbacks
-                self.feedbacks.clear()
+            feedback = GoodsFeedback.objects.filter(product=product, comment=None).order_by('pk')
+            self.feed_appender(feedback)
+            feedbacks += self.feedbacks
+            print(feedbacks)
+            self.feedbacks.clear()
         except GoodsFeedback.DoesNotExist:
             feedback = None
         return render(request, self.template_name, locals())
-    #
-    # def feedloop(self, feed):
-    #     variable = 'comment'
-    #     feedback_replay = GoodsFeedback.objects.filter(**{variable: feed})
-    #     if feedback_replay:
-    #         variable += '__comment'
-    #         self.feedloop(feedback_replay)
 
     def feed_appender(self, feedback):
         for feed in feedback:
             self.feedbacks.append(feed)
             self.feedloop(feed)
 
-    #     return self.feedbacks
     def feedloop(self, feed):
-        feedback_replay = GoodsFeedback.objects.filter(comment=feed)
+        feedback_replay = GoodsFeedback.objects.filter(comment=feed).order_by('pk')
         if feedback_replay:
             self.feed_appender(feedback_replay)
 
@@ -62,7 +53,7 @@ class ProductDetailView(View):
             feedback.product_id = product_id
             feedback.writer = request.user
             try:
-                replay = GoodsFeedback.objects.get(comment__comment_id=request.POST['replay-comment-id'])
+                replay = GoodsFeedback.objects.get(id=request.POST['replay-comment-id'])
                 feedback.comment = replay
             except ValueError:
                 feedback.comment = None
